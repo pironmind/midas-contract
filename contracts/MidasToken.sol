@@ -5,7 +5,12 @@ pragma solidity ^0.8.15;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./RBAC.sol";
 
-contract MidasToken is ERC20("Midas", "MIDAS"), RBAC {
+contract MidasToken is ERC20, RBAC {
+	constructor(address _admin)
+		ERC20("Midas", "MIDAS")
+		RBAC(_admin)
+	{}
+
 	function mint(address _to, uint256 _amount) external onlyRole(MINTER_ROLE) {
 		_mint(_to, _amount);
 	}

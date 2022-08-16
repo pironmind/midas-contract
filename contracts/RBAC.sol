@@ -9,6 +9,8 @@ contract RBAC is AccessControlEnumerable {
 	bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
 	constructor(address _admin) {
+		require(_admin != address(0), "RBAC: admin set");
+
 		_grantRole(DEFAULT_ADMIN_ROLE, _admin);
 	}
 
