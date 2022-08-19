@@ -91,11 +91,16 @@ contract MasterChef is Ownable, Multicall {
 		startBlock = _startBlock;
 	}
 
+	/**
+     * @dev Returns pool length.
+     */
 	function poolLength() external view returns (uint256 length) {
 		length = poolInfo.length;
 	}
 
-	// Add a new lp to the pool. Can only be called by the owner.
+	/**
+     * @dev Add a new lp to the pool. Can only be called by the owner.
+     */
 	function add(
 		uint256 _allocPoint,
 		IERC20 _lpToken,
@@ -120,7 +125,9 @@ contract MasterChef is Ownable, Multicall {
 		);
 	}
 
-	// Update the given pool's MIDAS allocation point. Can only be called by the owner.
+	/**
+     * @dev Update the given pool's MIDAS allocation point. Can only be called by the owner.
+     */
 	function set(
 		uint256 _pid,
 		uint256 _allocPoint,
@@ -136,12 +143,16 @@ contract MasterChef is Ownable, Multicall {
 		}
 	}
 
-	// Set reward multiplier. Zero set disable mining
+	/**
+     * @dev Set reward multiplier. Zero set disable mining.
+     */
 	function setRewardMultiplier(uint256 _multiplier) public onlyOwner {
 		rewardMultiplier = _multiplier;
 	}
 
-	// Return reward multiplier over the given _from to _to block.
+	/**
+     * @dev Return reward multiplier over the given _from to _to block.
+     */
 	function getMultiplier(uint256 _from, uint256 _to)
 		public
 		view
@@ -150,7 +161,9 @@ contract MasterChef is Ownable, Multicall {
 		multiplier = (_to - _from) * rewardMultiplier;
 	}
 
-	// View function to see pending MIDASes on frontend.
+	/**
+     * @dev View function to see pending MIDASes on frontend.
+     */
 	function pendingReward(uint256 _pid, address _user)
 		external
 		view
@@ -168,7 +181,9 @@ contract MasterChef is Ownable, Multicall {
 		reward = user.amount * accTokensPerShare / 1e12 - user.rewardDebt;
 	}
 
-	// Update reward vairables for all pools. Be careful of gas spending!
+	/**
+     * @dev Update reward vairables for all pools. Be careful of gas spending!
+     */
 	function massUpdatePools() public {
 		uint256 length = poolInfo.length;
 		for (uint256 pid = 0; pid < length; ++pid) {
@@ -176,7 +191,9 @@ contract MasterChef is Ownable, Multicall {
 		}
 	}
 
-	// Update reward variables of the given pool to be up-to-date.
+	/**
+     * @dev Update reward variables of the given pool to be up-to-date.
+     */
 	function updatePool(uint256 _pid) public {
 		PoolInfo storage pool = poolInfo[_pid];
 		if (block.number <= pool.lastRewardBlock) {
@@ -201,7 +218,9 @@ contract MasterChef is Ownable, Multicall {
 		pool.lastRewardBlock = block.number;
 	}
 
-	// Deposit LP tokens to MasterChef for MIDAS allocation.
+	/**
+     * @dev Deposit LP tokens to MasterChef for MIDAS allocation.
+     */
 	function deposit(uint256 _pid, uint256 _amount) public {
 		PoolInfo storage pool = poolInfo[_pid];
 		UserInfo storage user = userInfo[_pid][msg.sender];
@@ -222,7 +241,9 @@ contract MasterChef is Ownable, Multicall {
 		emit Deposit(msg.sender, _pid, _amount);
 	}
 
-	// Withdraw LP tokens from MasterChef.
+	/**
+     * @dev Withdraw LP tokens from MasterChef.
+     */
 	function withdraw(uint256 _pid, uint256 _amount) public {
 		PoolInfo storage pool = poolInfo[_pid];
 		UserInfo storage user = userInfo[_pid][msg.sender];
@@ -240,7 +261,9 @@ contract MasterChef is Ownable, Multicall {
 		emit Withdraw(msg.sender, _pid, _amount);
 	}
 
-	// Withdraw without caring about rewards. EMERGENCY ONLY.
+	/**
+     * @dev Withdraw without caring about rewards. EMERGENCY ONLY.
+     */
 	function emergencyWithdraw(uint256 _pid) public {
 		PoolInfo storage pool = poolInfo[_pid];
 		UserInfo storage user = userInfo[_pid][msg.sender];
@@ -250,7 +273,9 @@ contract MasterChef is Ownable, Multicall {
 		user.rewardDebt = 0;
 	}
 
-	// Update dev address by the previous dev.
+	/**
+     * @dev Update dev address by the previous dev.
+     */
 	function setDev(address _account) public {
 		require(msg.sender == _account, "dev: wut?");
 
@@ -263,7 +288,10 @@ contract MasterChef is Ownable, Multicall {
 		devfee = _fee;
 	}
 
-	// Safe midasToken transfer function, just in case if rounding error causes pool to not have enough MIDASes.
+	/**
+     * @dev Safe midasToken transfer function, just in case
+     * if rounding error causes pool to not have enough MIDASes.
+     */
 	function _safeTransfer(address _to, uint256 _amount) internal {
 		uint256 midasBalance = midasToken.balanceOf(address(this));
 		if (_amount > midasBalance) {
