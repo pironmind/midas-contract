@@ -1,6 +1,11 @@
 {
   "name": "@midas/contracts",
   "version": "0.1.0",
+  "scripts": {
+    "build": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "docgen": "npx hardhat docgen"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
@@ -14,6 +19,7 @@
     "erc721a": "^4.2.2",
     "ethers": "^5.6.9",
     "hardhat": "^2.10.1",
+    "hardhat-docgen": "^1.3.0",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.7.21",
     "ts-node": "^10.9.1",
