@@ -31,9 +31,7 @@ contract Locker is RBAC {
      * @dev Lock tokens on second chain by sender account.
      */
 	function lock() external {
-		uint256 accountBalance = midas.balanceOf(msg.sender);
-		midas.safeTransferFrom(msg.sender, address(0xdead), accountBalance);
-		emit Locked(msg.sender, msg.sender, accountBalance);
+		_lock(msg.sender, msg.sender);
 	}
 
 	/**
@@ -46,9 +44,7 @@ contract Locker is RBAC {
 			"Locker: zero address"
 		);
 
-		uint256 accountBalance = midas.balanceOf(msg.sender);
-
-		emit Locked(msg.sender, _account, accountBalance);
+		_lock(msg.sender, _account);
 	}
 
 	/**
@@ -57,9 +53,17 @@ contract Locker is RBAC {
 	function burn(address[] calldata _accounts, uint256[] calldata _balances) external onlyRole(BURNER_ROLE) {
 		require(_accounts.length == _balances.length, "Invalid input length");
 
+		uint256 balance;
 		for (uint256 i; i < _accounts.length; i++) {
-			midas.safeTransfer(address(0xdead), _balances[i]);
+			balance += _balances[i];
 			emit Locked(address(this), _accounts[i], _balances[i]);
 		}
+		midas.safeTransfer(address(0xdead), balance);
+	}
+
+	function _lock(address _operator, address _account) internal {
+		uint256 accountBalance = midas.balanceOf(_operator);
+		midas.safeTransferFrom(_operator, address(0xdead), accountBalance);
+		emit Locked(_operator, _account, accountBalance);
 	}
 }
