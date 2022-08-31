@@ -22,9 +22,9 @@ contract Minter is RBAC(msg.sender) {
 	address public midas;
 	uint256 public nonce;
 
-	mapping(bytes => Data) public data;
+	mapping(bytes32 => Data) public data;
 
-	event Minted(address to, uint256 amount, bytes tnx);
+	event Minted(address to, uint256 amount, bytes32 tnx);
 
 	constructor(address _midasToken) {
 		require(_midasToken != address(0), "Minter: constructor zero token");
@@ -33,7 +33,7 @@ contract Minter is RBAC(msg.sender) {
 	}
 
 	function mint(
-		bytes calldata _txHash,
+		bytes32 _txHash,
 		Data calldata _data,
 		bytes32 _checkSign
 	)

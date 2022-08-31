@@ -12,8 +12,6 @@ import {
     expectRevert,
     getDateNow
 } from "../helper";
-import keccak256 from "keccak256";
-import {string} from "hardhat/internal/core/params/argumentTypes";
 
 chai.use(solidity);
 
@@ -29,6 +27,7 @@ describe("Minter", function () {
 
     let token: any;
     let minter: any;
+    let signatureEncoder: any;
 
     const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
@@ -49,12 +48,16 @@ describe("Minter", function () {
 
         const Minter = await ethers.getContractFactory("Minter")
         const MidasToken = await ethers.getContractFactory("MidasToken")
+        const SignatureEncoder = await ethers.getContractFactory("SignatureEncoder")
 
         token = await MidasToken.deploy(OWNER);
         await token.deployed()
 
         minter = await Minter.deploy(token.address);
         await minter.deployed()
+
+        signatureEncoder = await SignatureEncoder.deploy();
+        await signatureEncoder.deployed()
 
         const MINTER_ROLE = await token.MINTER_ROLE()
         await token.grantRole(MINTER_ROLE, minter.address)
@@ -65,32 +68,24 @@ describe("Minter", function () {
         await restoreSnapshot(snapshotId)
     })
 
-    it.only("#mint", async () => {
-        let abiCoder = new ethers.utils.AbiCoder()
-
-        let types: any = [
-            "string",
-            "tuple(uint256 amount, address recipient)",
-            "uint256"
-        ]
-
+    it("#mint", async () => {
         let testTx = '0xc67e003ab3082631aabbf94c41562fcdadf56e02858bd66727fb9f85355d4085'
-        let data = [parseEther('10000'), BUYER]
+        let data = {
+            amount: parseEther('10000'),
+            recipient: BUYER
+        }
         let nonce = await minter.nonce()
+        let signature = await signatureEncoder.getSignature(testTx, data, nonce)
 
-        let values: any = [
-            testTx,
-            data,
-            nonce
-        ]
+        let signatureWithWrongNonce = await signatureEncoder.getSignature(testTx, data, 1)
+        await expectRevert(minter.mint(testTx, data, signatureWithWrongNonce), "Minter: bed signature")
 
-        let encodedData = abiCoder.encode(types, values)
-        console.log(encodedData)
-        let signature = keccak256(encodedData)
-        console.log(`0x${signature.toString('hex')}`)
+        await minter.mint(testTx, data, signature)
+        assert.equal(String(await token.balanceOf(BUYER)), String(parseEther('10000')))
 
-        await minter.mint(testTx, data, `0x${signature.toString('hex')}`)
-        assert.equal(String(await token.balanceOf(DEAD_ADDRESS)), String(parseEther('10000')))
+        nonce = await minter.nonce()
+        signature = await signatureEncoder.getSignature(testTx, data, nonce)
+
+        await expectRevert(minter.mint(testTx, data, signature), "Minter: tnx handled")
     })
-
 });

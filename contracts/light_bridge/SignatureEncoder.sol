@@ -9,7 +9,7 @@ contract SignatureEncoder {
 	}
 
 	function getSignature(
-		bytes calldata _txHash,
+		bytes32 _txHash,
 		Data calldata _data,
 		uint256 _nonce
 	)
