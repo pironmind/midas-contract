@@ -3,7 +3,6 @@ import chai from "chai";
 import { ethers } from "hardhat";
 import { BigNumber, Signer } from "ethers";
 import { assert } from "chai";
-import { solidity } from "ethereum-waffle";
 import { parseEther } from "ethers/lib/utils";
 import {
     createSnapshot,
@@ -12,8 +11,6 @@ import {
     expectRevert,
     getDateNow
 } from "../helper";
-
-chai.use(solidity);
 
 
 describe("Locker", function () {
