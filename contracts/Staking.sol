@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Multicall.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./interfaces/IFungibleToken.sol";
 
-// @title MasterChef - farming/staking contract.
+// @title Staking - staking contract simplified MasterChef.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
 // will be transferred to a governance smart contract once MIDAS is sufficiently
