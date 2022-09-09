@@ -16,6 +16,9 @@ import "./interfaces/IFungibleToken.sol";
 // will be transferred to a governance smart contract once MIDAS is sufficiently
 // distributed and the community can show to govern itself.
 //
+// Please disable mining in two steps first remove MINTER_ROLE rights, then through
+// some time set multiplier value 0.
+//
 // Have fun reading it. Hopefully it's bug-free. God bless.
 contract Staking is Ownable, Multicall {
 	using SafeERC20 for IERC20;
@@ -155,7 +158,7 @@ contract Staking is Ownable, Multicall {
 		}
 
 		try rewardToken.mint(address(this), tokenReward) {
-			tokenReward = 0;
+			//
 		} catch {
 			emit MintError();
 		}
@@ -166,6 +169,7 @@ contract Staking is Ownable, Multicall {
 
 	/**
      * @dev Deposit LP tokens to MasterChef for MIDAS allocation.
+     *      Send `_amount` as 0 for claim effect.
      */
 	function deposit(uint256 _amount) external {
 		PoolInfo storage pool = poolInfo;
@@ -173,7 +177,9 @@ contract Staking is Ownable, Multicall {
 		updatePool();
 		if (user.amount > 0) {
 			uint256 pending = (user.amount * pool.accTokensPerShare / 1e12) - user.rewardDebt;
-			_safeTransfer(msg.sender, pending);
+			if (pending > 0) {
+				_safeTransfer(msg.sender, pending);
+			}
 		}
 		if (_amount != 0) {
 			pool.stakingToken.safeTransferFrom(
@@ -226,12 +232,8 @@ contract Staking is Ownable, Multicall {
      * @dev Reclaim lost tokens.
      */
 	function reclaim(address _token) external onlyOwner {
-		uint256 amount;
-		if (_token == address(rewardToken)) {
-			amount = IERC20(_token).balanceOf(address(this)) - poolInfo.totalDeposited;
-		} else {
-			amount = IERC20(_token).balanceOf(address(this));
-		}
+		require(_token != address(rewardToken), "Only not reward token");
+		uint256 amount = IERC20(_token).balanceOf(address(this));
 		require(amount != 0, "NO_RECLAIM");
 		IERC20(_token).safeTransfer(owner(), amount);
 	}
@@ -257,7 +259,7 @@ contract Staking is Ownable, Multicall {
      * if rounding error causes pool to not have enough MIDASes.
      */
 	function _safeTransfer(address _to, uint256 _amount) internal {
-		uint256 midasBalance = rewardToken.balanceOf(address(this));
+		uint256 midasBalance = rewardToken.balanceOf(address(this)) - poolInfo.totalDeposited;
 		if (_amount > midasBalance) {
 			rewardToken.safeTransfer(_to, midasBalance);
 		} else {
