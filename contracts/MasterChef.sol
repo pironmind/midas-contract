@@ -277,13 +277,14 @@ contract MasterChef is Ownable, Multicall {
      * @dev Update dev address by the previous dev.
      */
 	function setDev(address _account) public {
-		require(msg.sender == _account, "dev: wut?");
+		require(msg.sender == devaddr, "dev: wut?");
 
 		devaddr = _account;
 	}
 
 	function setDevFee(uint256 _fee) external {
-		require(_fee <= 100, "double dev reward reached");
+		require(msg.sender == devaddr, "dev: wut?");
+		require(_fee <= 25, "max dev fee reached");
 
 		devfee = _fee;
 	}
