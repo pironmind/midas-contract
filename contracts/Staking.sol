@@ -101,7 +101,7 @@ contract Staking is Ownable, Multicall {
     }
 
     /**
-     * @dev Deposit LP tokens to MasterChef for MIDAS allocation.
+     * @dev Deposit token.
      *      Send `_amount` as 0 for claim effect.
      */
     function deposit(uint256 _amount) external {
@@ -124,7 +124,7 @@ contract Staking is Ownable, Multicall {
     }
 
     /**
-     * @dev Withdraw LP tokens from MasterChef.
+     * @dev Withdraw tokens with reward.
      */
     function withdraw(uint256 _amount) external {
         PoolInfo storage pool = poolInfo;
