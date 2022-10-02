@@ -87,6 +87,7 @@ contract Staking is Ownable, Multicall {
      * @dev Set tokens per block. Zero set disable mining.
      */
     function setTokensPerBlock(uint256 _amount) external onlyOwner {
+        updatePool();
         tokensPerBlock = _amount;
     }
 
@@ -94,6 +95,7 @@ contract Staking is Ownable, Multicall {
      * @dev Set reward multiplier. Zero set disable mining.
      */
     function setRewardMultiplier(uint256 _multiplier) external onlyOwner {
+        updatePool();
         rewardMultiplier = _multiplier;
     }
 
