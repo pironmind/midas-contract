@@ -5,7 +5,7 @@
     "const-name-snakecase": "warn",
     "max-line-length": [
       "warn",
-      80
+      120
     ],
     "indent": "warn",
     "avoid-suicide": "error",

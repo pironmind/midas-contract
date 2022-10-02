@@ -37,10 +37,7 @@ contract Minter is RBAC(msg.sender) {
         Data calldata _data,
         bytes32 _checkSign
     ) external onlyRole(MINTER_ROLE) {
-        require(
-            _checkSign == keccak256(abi.encode(_txHash, _data, nonce)),
-            "Minter: bed signature"
-        );
+        require(_checkSign == keccak256(abi.encode(_txHash, _data, nonce)), "Minter: bed signature");
         require(data[_txHash].recipient == address(0), "Minter: tnx handled");
 
         IMidas(midas).mint(_data.recipient, _data.amount);

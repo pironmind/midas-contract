@@ -20,10 +20,7 @@ contract Locker is RBAC {
     event Locked(address from, address to, uint256 amount);
 
     constructor(IERC20 _midasToken, address _admin) RBAC(_admin) {
-        require(
-            address(_midasToken) != address(0),
-            "Locker: constructor zero token"
-        );
+        require(address(_midasToken) != address(0), "Locker: constructor zero token");
 
         midas = _midasToken;
     }
@@ -39,10 +36,7 @@ contract Locker is RBAC {
      * @dev Lock on second chain with change recipient address.
      */
     function lockFor(address _account) external {
-        require(
-            _account != address(0) && _account != address(0xdead),
-            "Locker: zero address"
-        );
+        require(_account != address(0) && _account != address(0xdead), "Locker: zero address");
 
         _lock(msg.sender, _account);
     }
@@ -50,10 +44,7 @@ contract Locker is RBAC {
     /**
      * @dev Burn missing tokens from this CA.
      */
-    function burn(address[] calldata _accounts, uint256[] calldata _balances)
-        external
-        onlyRole(BURNER_ROLE)
-    {
+    function burn(address[] calldata _accounts, uint256[] calldata _balances) external onlyRole(BURNER_ROLE) {
         require(_accounts.length == _balances.length, "Invalid input length");
 
         uint256 balance;

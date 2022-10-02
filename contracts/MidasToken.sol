@@ -17,10 +17,7 @@ contract MidasToken is ERC20, RBAC {
      * @dev Implement {ERC20._mint} functionality with MINTER_ROLE permission.
      */
     function mint(address _to, uint256 _amount) external onlyRole(MINTER_ROLE) {
-        require(
-            totalSupply() + _amount <= MAX_TOTAL_SUPPLY,
-            "MidasToken: MAX_SUPPLY_OVERFLOW"
-        );
+        require(totalSupply() + _amount <= MAX_TOTAL_SUPPLY, "MidasToken: MAX_SUPPLY_OVERFLOW");
         _mint(_to, _amount);
     }
 

@@ -46,12 +46,12 @@ contract Staking is Ownable, Multicall {
     uint256 public tokensPerBlock;
     // Bonus muliplier for early rewardToken makers.
     uint256 public rewardMultiplier = 1;
+    // The block number when MIDAS mining starts.
+    uint256 public startBlock;
     // Info of each pool.
     PoolInfo public poolInfo;
     // Info of each user that stakes LP tokens.
     mapping(address => UserInfo) public userInfo;
-    // The block number when MIDAS mining starts.
-    uint256 public startBlock;
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
@@ -68,10 +68,7 @@ contract Staking is Ownable, Multicall {
         uint256 _tokensPerBlock,
         uint256 _startBlock
     ) {
-        require(
-            address(_midasToken) != address(0) && _devaddr != address(0),
-            "Master chef: constructor set"
-        );
+        require(address(_midasToken) != address(0) && _devaddr != address(0), "Master chef: constructor set");
 
         rewardToken = _midasToken;
         devaddr = _devaddr;
@@ -106,82 +103,6 @@ contract Staking is Ownable, Multicall {
     }
 
     /**
-     * @dev Return reward multiplier over the given _from to _to block.
-     */
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256 multiplier)
-    {
-        multiplier = (_to - _from) * rewardMultiplier;
-    }
-
-    /**
-     * @dev View function to see pending MIDASes on frontend.
-     */
-    function pendingReward(address _user)
-        external
-        view
-        returns (uint256 reward)
-    {
-        PoolInfo memory pool = poolInfo;
-        UserInfo memory user = userInfo[_user];
-        uint256 accTokensPerShare = pool.accTokensPerShare;
-        uint256 lpSupply = pool.totalDeposited;
-        if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier = getMultiplier(
-                pool.lastRewardBlock,
-                block.number
-            );
-            uint256 tokenReward = multiplier * tokensPerBlock;
-            accTokensPerShare =
-                accTokensPerShare +
-                ((tokenReward * 1e12) / lpSupply);
-        }
-        reward = (user.amount * accTokensPerShare) / 1e12 - user.rewardDebt;
-    }
-
-    /**
-     * @dev Update reward variables of the given pool to be up-to-date.
-     */
-    function updatePool() public {
-        PoolInfo storage pool = poolInfo;
-        if (block.number <= pool.lastRewardBlock) {
-            return;
-        }
-        uint256 lpSupply = pool.totalDeposited;
-        if (lpSupply == 0) {
-            pool.lastRewardBlock = block.number;
-            return;
-        }
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 tokenReward = multiplier * tokensPerBlock;
-        if (tokenReward == 0) {
-            pool.lastRewardBlock = block.number;
-            return;
-        }
-
-        if (devaddr != address(0) && devfee != 0) {
-            try rewardToken.mint(devaddr, (tokenReward * devfee) / 100) {
-                //
-            } catch {
-                emit MintError();
-            }
-        }
-
-        try rewardToken.mint(address(this), tokenReward) {
-            //
-        } catch {
-            emit MintError();
-        }
-
-        pool.accTokensPerShare =
-            pool.accTokensPerShare +
-            ((tokenReward * 1e12) / lpSupply);
-        pool.lastRewardBlock = block.number;
-    }
-
-    /**
      * @dev Deposit LP tokens to MasterChef for MIDAS allocation.
      *      Send `_amount` as 0 for claim effect.
      */
@@ -190,18 +111,13 @@ contract Staking is Ownable, Multicall {
         UserInfo storage user = userInfo[msg.sender];
         updatePool();
         if (user.amount > 0) {
-            uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) -
-                user.rewardDebt;
+            uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) - user.rewardDebt;
             if (pending > 0) {
                 _safeTransfer(msg.sender, pending);
             }
         }
         if (_amount != 0) {
-            pool.stakingToken.safeTransferFrom(
-                address(msg.sender),
-                address(this),
-                _amount
-            );
+            pool.stakingToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount + _amount;
             pool.totalDeposited += _amount;
         }
@@ -217,8 +133,7 @@ contract Staking is Ownable, Multicall {
         UserInfo storage user = userInfo[msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool();
-        uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) -
-            user.rewardDebt;
+        uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) - user.rewardDebt;
         if (pending > 0) {
             _safeTransfer(msg.sender, pending);
         }
@@ -273,12 +188,72 @@ contract Staking is Ownable, Multicall {
     }
 
     /**
+     * @dev View function to see pending MIDASes on frontend.
+     */
+    function pendingReward(address _user) external view returns (uint256 reward) {
+        PoolInfo memory pool = poolInfo;
+        UserInfo memory user = userInfo[_user];
+        uint256 accTokensPerShare = pool.accTokensPerShare;
+        uint256 lpSupply = pool.totalDeposited;
+        if (block.number > pool.lastRewardBlock && lpSupply != 0) {
+            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 tokenReward = multiplier * tokensPerBlock;
+            accTokensPerShare = accTokensPerShare + ((tokenReward * 1e12) / lpSupply);
+        }
+        reward = (user.amount * accTokensPerShare) / 1e12 - user.rewardDebt;
+    }
+
+    /**
+     * @dev Update reward variables of the given pool to be up-to-date.
+     */
+    function updatePool() public {
+        PoolInfo storage pool = poolInfo;
+        if (block.number <= pool.lastRewardBlock) {
+            return;
+        }
+        uint256 lpSupply = pool.totalDeposited;
+        if (lpSupply == 0) {
+            pool.lastRewardBlock = block.number;
+            return;
+        }
+        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+        uint256 tokenReward = multiplier * tokensPerBlock;
+        if (tokenReward == 0) {
+            pool.lastRewardBlock = block.number;
+            return;
+        }
+
+        if (devaddr != address(0) && devfee != 0) {
+            try rewardToken.mint(devaddr, (tokenReward * devfee) / 100) {
+                //
+            } catch {
+                emit MintError();
+            }
+        }
+
+        try rewardToken.mint(address(this), tokenReward) {
+            //
+        } catch {
+            emit MintError();
+        }
+
+        pool.accTokensPerShare = pool.accTokensPerShare + ((tokenReward * 1e12) / lpSupply);
+        pool.lastRewardBlock = block.number;
+    }
+
+    /**
+     * @dev Return reward multiplier over the given _from to _to block.
+     */
+    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256 multiplier) {
+        multiplier = (_to - _from) * rewardMultiplier;
+    }
+
+    /**
      * @dev Safe rewardToken transfer function, just in case
      * if rounding error causes pool to not have enough MIDASes.
      */
     function _safeTransfer(address _to, uint256 _amount) internal {
-        uint256 midasBalance = rewardToken.balanceOf(address(this)) -
-            poolInfo.totalDeposited;
+        uint256 midasBalance = rewardToken.balanceOf(address(this)) - poolInfo.totalDeposited;
         if (_amount > midasBalance) {
             rewardToken.safeTransfer(_to, midasBalance);
         } else {

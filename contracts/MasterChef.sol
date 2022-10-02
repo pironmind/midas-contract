@@ -67,11 +67,7 @@ contract MasterChef is Ownable, Multicall {
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event EmergencyWithdraw(
-        address indexed user,
-        uint256 indexed pid,
-        uint256 amount
-    );
+    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
         IFungibleToken _midasToken,
@@ -79,10 +75,7 @@ contract MasterChef is Ownable, Multicall {
         uint256 _tokensPerBlock,
         uint256 _startBlock
     ) {
-        require(
-            address(_midasToken) != address(0) && _devaddr != address(0),
-            "Master chef: constructor set"
-        );
+        require(address(_midasToken) != address(0) && _devaddr != address(0), "Master chef: constructor set");
 
         midasToken = _midasToken;
         devaddr = _devaddr;
@@ -111,9 +104,7 @@ contract MasterChef is Ownable, Multicall {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock = block.number > startBlock
-            ? block.number
-            : startBlock;
+        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint + _allocPoint;
         poolInfo.push(
             PoolInfo({
@@ -153,37 +144,22 @@ contract MasterChef is Ownable, Multicall {
     /**
      * @dev Return reward multiplier over the given _from to _to block.
      */
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256 multiplier)
-    {
+    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256 multiplier) {
         multiplier = (_to - _from) * rewardMultiplier;
     }
 
     /**
      * @dev View function to see pending MIDASes on frontend.
      */
-    function pendingReward(uint256 _pid, address _user)
-        external
-        view
-        returns (uint256 reward)
-    {
+    function pendingReward(uint256 _pid, address _user) external view returns (uint256 reward) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo memory user = userInfo[_pid][_user];
         uint256 accTokensPerShare = pool.accTokensPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier = getMultiplier(
-                pool.lastRewardBlock,
-                block.number
-            );
-            uint256 tokenReward = (multiplier *
-                tokensPerBlock *
-                pool.allocPoint) / totalAllocPoint;
-            accTokensPerShare =
-                accTokensPerShare +
-                ((tokenReward * 1e12) / lpSupply);
+            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 tokenReward = (multiplier * tokensPerBlock * pool.allocPoint) / totalAllocPoint;
+            accTokensPerShare = accTokensPerShare + ((tokenReward * 1e12) / lpSupply);
         }
         reward = (user.amount * accTokensPerShare) / 1e12 - user.rewardDebt;
     }
@@ -212,8 +188,7 @@ contract MasterChef is Ownable, Multicall {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 tokenReward = (multiplier * tokensPerBlock * pool.allocPoint) /
-            totalAllocPoint;
+        uint256 tokenReward = (multiplier * tokensPerBlock * pool.allocPoint) / totalAllocPoint;
         if (tokenReward == 0) {
             return;
         }
@@ -222,9 +197,7 @@ contract MasterChef is Ownable, Multicall {
         }
         midasToken.mint(address(this), tokenReward);
 
-        pool.accTokensPerShare =
-            pool.accTokensPerShare +
-            ((tokenReward * 1e12) / lpSupply);
+        pool.accTokensPerShare = pool.accTokensPerShare + ((tokenReward * 1e12) / lpSupply);
         pool.lastRewardBlock = block.number;
     }
 
@@ -236,16 +209,11 @@ contract MasterChef is Ownable, Multicall {
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) -
-                user.rewardDebt;
+            uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) - user.rewardDebt;
             _safeTransfer(msg.sender, pending);
         }
         if (_amount != 0) {
-            pool.lpToken.safeTransferFrom(
-                address(msg.sender),
-                address(this),
-                _amount
-            );
+            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount + _amount;
         }
         user.rewardDebt = (user.amount * pool.accTokensPerShare) / 1e12;
@@ -260,8 +228,7 @@ contract MasterChef is Ownable, Multicall {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) -
-            user.rewardDebt;
+        uint256 pending = ((user.amount * pool.accTokensPerShare) / 1e12) - user.rewardDebt;
         if (pending > 0) {
             _safeTransfer(msg.sender, pending);
         }
