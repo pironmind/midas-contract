@@ -57,6 +57,10 @@ contract Staking is Ownable, Multicall {
     event Withdraw(address indexed user, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 amount);
     event MintError();
+    event TokenPerBlockSet(uint256 amount);
+    event RewardMultiplierSet(uint256 multiplier);
+    event DevSet(address account);
+    event DevFeeSet(uint256 fee);
 
     constructor(
         IFungibleToken _midasToken,
@@ -89,6 +93,7 @@ contract Staking is Ownable, Multicall {
     function setTokensPerBlock(uint256 _amount) external onlyOwner {
         updatePool();
         tokensPerBlock = _amount;
+        emit TokenPerBlockSet(_amount);
     }
 
     /**
@@ -97,6 +102,7 @@ contract Staking is Ownable, Multicall {
     function setRewardMultiplier(uint256 _multiplier) external onlyOwner {
         updatePool();
         rewardMultiplier = _multiplier;
+        emit RewardMultiplierSet(_multiplier);
     }
 
     /**
@@ -255,6 +261,7 @@ contract Staking is Ownable, Multicall {
         require(msg.sender == devaddr, "dev: wut?");
 
         devaddr = _account;
+        emit DevSet(_account);
     }
 
     function setDevFee(uint256 _fee) external {
@@ -262,6 +269,7 @@ contract Staking is Ownable, Multicall {
         require(_fee <= 25, "max dev reward reached");
 
         devfee = _fee;
+        emit DevFeeSet(_fee);
     }
 
     /**
