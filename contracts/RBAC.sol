@@ -21,7 +21,7 @@ contract RBAC is AccessControlEnumerable {
      * @dev Calculate role hash by input string.
      */
     function getRoleHash(string memory _role)
-        public
+        external
         pure
         returns (bytes32 hash)
     {
