@@ -172,6 +172,7 @@ contract Staking is Ownable, Multicall {
      */
     function setDev(address _account) external {
         require(msg.sender == devaddr, "dev: wut?");
+        require(_account != address(0), "Zero address set");
 
         devaddr = _account;
         emit DevSet(_account);
