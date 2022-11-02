@@ -34,16 +34,18 @@ contract Staking is Ownable, Multicall {
         uint256 accTokensPerShare; // Accumulated MIDASes per share, times 1e12. See below.
         uint256 totalDeposited; // Total deposited tokens amount.
     }
+
+    bool internal _initialized;
     // The MIDAS TOKEN!
-    IFungibleToken public immutable rewardToken;
+    IFungibleToken public rewardToken;
     // Dev address.
     address public devaddr;
     // Dev fee percent reward.
-    uint256 public devfee = 12;
+    uint256 public devfee;
     // MIDAS tokens created per block.
     uint256 public tokensPerBlock;
     // Bonus muliplier for early rewardToken makers.
-    uint256 public rewardMultiplier = 1;
+    uint256 public rewardMultiplier;
     // The block number when MIDAS mining starts.
     uint256 public startBlock;
     // Info of each pool.
@@ -60,18 +62,26 @@ contract Staking is Ownable, Multicall {
     event DevSet(address account);
     event DevFeeSet(uint256 fee);
 
-    constructor(
+    function initialize(
         IFungibleToken _midasToken,
+        address _admin,
         address _devaddr,
         uint256 _tokensPerBlock,
         uint256 _startBlock
-    ) {
+    ) public {
+        require(!_initialized, "Initialized");
         require(address(_midasToken) != address(0) && _devaddr != address(0), "Master chef: constructor set");
+
+        _initialized = true;
+        _transferOwnership(_admin);
 
         rewardToken = _midasToken;
         devaddr = _devaddr;
         tokensPerBlock = _tokensPerBlock;
         startBlock = _startBlock;
+
+        devfee = 12;
+        rewardMultiplier = 1;
 
         // staking pool
         poolInfo = PoolInfo({
