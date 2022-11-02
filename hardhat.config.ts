@@ -18,9 +18,9 @@ const config: HardhatUserConfig = {
       accounts:
           process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    rinkeby: {
+    goerli: {
       gasPrice: "auto",
-      url: process.env.RINKEBY_URL || "",
+      url: process.env.GOERLI_URL || "",
       accounts:
           process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
