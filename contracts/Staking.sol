@@ -160,11 +160,11 @@ contract Staking is Ownable, Multicall {
     /**
      * @dev Reclaim lost tokens.
      */
-    function reclaim(address _token) external onlyOwner {
+    function reclaim(address _token, address _to) external onlyOwner {
         require(_token != address(rewardToken), "Only not reward token");
         uint256 amount = IERC20(_token).balanceOf(address(this));
         require(amount != 0, "NO_RECLAIM");
-        IERC20(_token).safeTransfer(owner(), amount);
+        IERC20(_token).safeTransfer(_to, amount);
     }
 
     /**
