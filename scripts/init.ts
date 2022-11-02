@@ -7,14 +7,16 @@ async function main() {
     console.log(owner.address)
 
     // We get the contract to deploy
-    const MidasTokenOld = await hre.ethers.getContractFactory("ERC20Mock");
+    const MidasTokenOld = await hre.ethers.getContractFactory("MidasToken");
     const MidasToken = await hre.ethers.getContractFactory("MidasToken");
     const Locker = await hre.ethers.getContractFactory("Locker");
     const Minter = await hre.ethers.getContractFactory("Minter");
+    const Staking = await hre.ethers.getContractFactory("Staking");
 
     if (hre.network.name === 'fantomTestnet') {
-        const token = await MidasTokenOld.attach('0x881A4739B666F05a59b46f1715efd163AB5152f7')
+        const token = await MidasTokenOld.attach('0xCCF87b63be0F89278C7217a672a03Ebd25e5ff3d')
         const locker = await Locker.attach('0x78DB5D79f1D26944c3290Ce4a553939125059C77')
+        const staking = await Staking.attach('0xf76c04dF2751dFfC1EBce18223F59DfdAD3a8d54')
 
         let tx: any;
         // tx = await token.approve(locker.address, parseEther('1000.0'))
@@ -26,8 +28,13 @@ async function main() {
         // tx = await locker.lock()
         // await tx.wait(3)
 
-        tx = await token.mint("0x7A0e73ceB4371681A93Cd1cE87e10C9bCC260c8A", parseEther('1000.0'))
-        await tx.wait(3)
+        // const MINTER_ROLE = await token.MINTER_ROLE()
+        // tx = await token.grantRole(MINTER_ROLE, staking.address)
+        // await tx.wait(3)
+        // tx = await token.mint("0x7A0e73ceB4371681A93Cd1cE87e10C9bCC260c8A", parseEther('100000.0'))
+        // await tx.wait(3)
+        // tx = await token.mint("0xE8E72Ecf60B3A1Ba2d37040c8d510CeDbda70B23", parseEther('100000.0'))
+        // await tx.wait(3)
 
         // let externalAddress = '0x2797257802D279d3ceF46c81e0bD834cDf982Fed'
         // tx = await locker.lockFor(externalAddress)
