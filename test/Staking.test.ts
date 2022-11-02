@@ -47,13 +47,6 @@ describe("Staking", function () {
         staking = await Staking.deploy()
         await staking.deployed()
 
-        // await staking.initialize(
-        //     midasToken.address,
-        //     OWNER,
-        //     midasPerBlock,
-        //     startBlock
-        // )
-
         proxyAdmin = await AdminProxy.deploy()
         await proxyAdmin.deployed()
 
@@ -69,14 +62,6 @@ describe("Staking", function () {
         await stakingProxy.deployed()
 
         stakingProxy = await Staking.attach(stakingProxy.address)
-
-        // await stakingProxy.initialize(
-        //     midasToken.address,
-        //     OWNER,
-        //     DEV,
-        //     midasPerBlock,
-        //     startBlock
-        // )
 
         const MINTER_ROLE = await midasToken.MINTER_ROLE()
         await midasToken.grantRole(MINTER_ROLE, OWNER)
@@ -95,8 +80,6 @@ describe("Staking", function () {
         it('#deposit proxy', async () => {
             await midasToken.mint(ALICE, parseEther('1000'))
             await midasToken.connect(ALICE_SIGNER).approve(stakingProxy.address, parseEther('1000'))
-
-            // assert.equal(String(await stakingProxy.pendingReward(ALICE)), "0", "Not zero?")
 
             await stakingProxy.connect(ALICE_SIGNER).deposit(parseEther('1000'))
 

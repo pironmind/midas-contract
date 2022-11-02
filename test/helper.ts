@@ -1,6 +1,5 @@
 import {network} from "hardhat";
 import {expect} from "chai";
-import {ethers} from "ethers";
 
 export function getDateNow() {
     return Math.floor(Date.now()/1000);
