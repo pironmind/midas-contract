@@ -11,3 +11,19 @@ GAS_REPORT=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
+
+# Installation
+
+Install node.js LTS.
+Install packages.
+
+# Init scripts
+
+Deploy Midas token and staking proxy.
+
+###### !!! available network names in hardhat.config.ts
+
+Execute script:
+```shell
+ npx hardhat run ./scripts/init.ts --network "goerli"
+```
