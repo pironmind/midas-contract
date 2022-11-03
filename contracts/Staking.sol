@@ -5,7 +5,6 @@ pragma solidity =0.8.15;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/Multicall.sol";
 import "./interfaces/IFungibleToken.sol";
 
 // @title Staking - staking contract simplified MasterChef.
@@ -18,7 +17,7 @@ import "./interfaces/IFungibleToken.sol";
 // some time set multiplier value 0.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract Staking is Ownable, Multicall {
+contract Staking is Ownable {
     using SafeERC20 for IERC20;
     using SafeERC20 for IFungibleToken;
 
