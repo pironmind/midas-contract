@@ -28,14 +28,12 @@ async function main() {
     console.log(`Proxy admin deployed: ${proxyAdmin.address}`)
 
     const ownerAddress = owner.address
-    const devAddress = owner.address
     const midasPerBlock = parseEther('1.0') // 1 MIDAS
     const startBlock = await getCurrentBlock()
 
     const data = staking.interface.encodeFunctionData("initialize", [
         midasToken.address,
         ownerAddress,
-        devAddress,
         midasPerBlock,
         startBlock
     ])

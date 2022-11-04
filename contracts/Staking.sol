@@ -37,10 +37,6 @@ contract Staking is Ownable {
     bool internal _initialized;
     // The MIDAS TOKEN!
     IFungibleToken public rewardToken;
-    // Dev address.
-    address public devaddr;
-    // Dev fee percent reward.
-    uint256 public devfee;
     // MIDAS tokens created per block.
     uint256 public tokensPerBlock;
     // Bonus muliplier for early rewardToken makers.
@@ -58,28 +54,23 @@ contract Staking is Ownable {
     event MintError();
     event TokenPerBlockSet(uint256 amount);
     event RewardMultiplierSet(uint256 multiplier);
-    event DevSet(address account);
-    event DevFeeSet(uint256 fee);
 
     function initialize(
         IFungibleToken _midasToken,
         address _admin,
-        address _devaddr,
         uint256 _tokensPerBlock,
         uint256 _startBlock
     ) public {
         require(!_initialized, "Initialized");
-        require(address(_midasToken) != address(0) && _devaddr != address(0), "Master chef: constructor set");
+        require(address(_midasToken) != address(0), "Staking: constructor set");
 
         _initialized = true;
         _transferOwnership(_admin);
 
         rewardToken = _midasToken;
-        devaddr = _devaddr;
         tokensPerBlock = _tokensPerBlock;
         startBlock = _startBlock;
 
-        devfee = 12;
         rewardMultiplier = 1;
 
         // staking pool
@@ -167,35 +158,6 @@ contract Staking is Ownable {
     }
 
     /**
-     * @dev Reclaim lost tokens.
-     */
-    function reclaim(address _token, address _to) external onlyOwner {
-        require(_token != address(rewardToken), "Only not reward token");
-        uint256 amount = IERC20(_token).balanceOf(address(this));
-        require(amount != 0, "NO_RECLAIM");
-        IERC20(_token).safeTransfer(_to, amount);
-    }
-
-    /**
-     * @dev Update dev address by the previous dev.
-     */
-    function setDev(address _account) external {
-        require(msg.sender == devaddr, "dev: wut?");
-        require(_account != address(0), "Zero address set");
-
-        devaddr = _account;
-        emit DevSet(_account);
-    }
-
-    function setDevFee(uint256 _fee) external {
-        require(msg.sender == devaddr, "dev: wut?");
-        require(_fee <= 25, "max dev reward reached");
-
-        devfee = _fee;
-        emit DevFeeSet(_fee);
-    }
-
-    /**
      * @dev View function to see pending MIDASes on frontend.
      */
     function pendingReward(address _user) external view returns (uint256 reward) {
@@ -229,14 +191,6 @@ contract Staking is Ownable {
         if (tokenReward == 0) {
             pool.lastRewardBlock = block.number;
             return;
-        }
-
-        if (devaddr != address(0) && devfee != 0) {
-            try rewardToken.mint(devaddr, (tokenReward * devfee) / 100) {
-                //
-            } catch {
-                emit MintError();
-            }
         }
 
         try rewardToken.mint(address(this), tokenReward) {

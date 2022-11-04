@@ -53,7 +53,6 @@ describe("Staking", function () {
         const data = staking.interface.encodeFunctionData("initialize", [
             midasToken.address,
             OWNER,
-            DEV,
             midasPerBlock,
             startBlock
         ])
@@ -85,16 +84,7 @@ describe("Staking", function () {
 
             assert.equal(String(await stakingProxy.connect(ALICE_SIGNER).pendingReward(ALICE)), "0", "Not zero?")
 
-            console.log(await stakingProxy.connect(ALICE_SIGNER).poolInfo())
-            console.log(await stakingProxy.connect(ALICE_SIGNER).userInfo(ALICE))
-
             await mineBlocks(1)
-            console.log(await stakingProxy.connect(ALICE_SIGNER).poolInfo())
-            console.log(await stakingProxy.connect(ALICE_SIGNER).userInfo(ALICE))
-            console.log(await stakingProxy.startBlock())
-            console.log(await stakingProxy.rewardToken())
-            console.log(await stakingProxy.devfee())
-            console.log(await stakingProxy.rewardMultiplier())
             assert.equal(String(await stakingProxy.pendingReward(ALICE)), String(parseEther('1')), "Not 1?")
 
             await mineBlocks(1)
