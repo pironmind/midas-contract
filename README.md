@@ -25,5 +25,5 @@ Deploy Midas token and staking proxy.
 
 Execute script:
 ```shell
- npx hardhat run ./scripts/init.ts --network "goerli"
+ npx hardhat run ./scripts/init.ts --network "network_name"
 ```
