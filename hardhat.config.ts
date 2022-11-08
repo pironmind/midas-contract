@@ -12,17 +12,17 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true
     },
-    fantomTestnet: {
-      gasPrice: "auto",
-      url: process.env.FANTOM_TESTNET_URL || "",
-      accounts:
-          process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
     goerli: {
       gasPrice: "auto",
       url: process.env.GOERLI_URL || "",
       accounts:
           process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    ethereum: {
+      gasPrice: "auto",
+      url: process.env.ETHEREUM_URL || "",
+      accounts:
+          process.env.PRIVATE_KEY_PROD !== undefined ? [process.env.PRIVATE_KEY_PROD] : [],
     },
   },
   docgen: {
